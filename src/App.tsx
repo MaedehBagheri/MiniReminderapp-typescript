@@ -1,24 +1,47 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useEffect, useState } from 'react';
 import './App.css';
+import ReminderList from './components/reminderList';
+import Reminder from './models/Reminder';
+import axios from 'axios';
+import NewReminder from './components/newReminder';
+import { postReminder } from './services/postReminder';
+
+
 
 function App() {
+  
+const [reminders,setReminders]=useState<Reminder[]>([]);
+
+
+useEffect(()=>{
+  loadReminder();
+},[]);
+
+
+const loadReminder = async ()=>{
+
+    const response= await axios.get<Reminder[]>
+  ("https://jsonplaceholder.typicode.com/todos");
+    setReminders(response.data)
+ 
+}
+
+
+const removeRminder =(id:number)=>{
+  const filteredReminder= reminders.filter(reminder => reminder.id !== id);
+  setReminders(filteredReminder)
+}
+
+
+const addReminder =async (title:string)=>{
+const newReminder =await postReminder(title);
+setReminders([newReminder,...reminders])
+}
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+     <NewReminder onAddReminder={addReminder}/>
+     <ReminderList items={reminders}   onRemoveReminder={removeRminder}/>
     </div>
   );
 }
